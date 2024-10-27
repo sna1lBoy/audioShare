@@ -18,7 +18,10 @@ if you require a different binary than the one in releases then audio share can 
 gcc `pkg-config --cflags gtk+-3.0` -o ./bin/audioShare ./src/main.c `pkg-config --libs gtk+-3.0` && ./bin/audioShare
 ```
 ### script
-for a simple installation, open the command line and enter `bash <(curl -s https://raw.githubusercontent.com/sna1lBoy/audioShare/main/install.sh)`
+for a simple installation, open the command line and enter
+```
+bash <(curl -s https://raw.githubusercontent.com/sna1lBoy/audioShare/main/install.sh)
+```
 if you want to manually install, download or clone the source code and move the contents of ./bin/ to /bin/ and ./resources/config.ini to /etc/audioShare/config.ini
 
 ## configuration

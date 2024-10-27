@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+char* sink;
+
 // prepping pulse audio
 void sinkWizardy() {
 
@@ -22,7 +24,7 @@ void sinkWizardy() {
 
     // getting source
     FILE *file;
-    file = fopen("./resources/config.ini", "r");
+    file = fopen("/etc/audioShare/config.ini", "r");
     char sourceFull[256];
     fgets(sourceFull, 256, file);
     char * source = strtok(sourceFull, " ");
@@ -34,7 +36,7 @@ void sinkWizardy() {
     // getting sink
     char sinkFull[256];
     fgets(sinkFull, 256, file);
-    char * sink = strtok(sinkFull, " ");
+    sink = strtok(sinkFull, " ");
     for(int i = 0; i<2; i++) {
       sink = strtok(NULL, " ");
     }
@@ -69,7 +71,8 @@ static void on_check_button_toggled(GtkToggleButton *toggle_button, gpointer use
     if (gtk_toggle_button_get_active(toggle_button)) {
         strcat(command, " sharedAudio");
     } else {
-        strcat(command, " alsa_output.pci-0000_00_1f.3.analog-stereo");
+        strcat(command, " ");
+        strcat(command, sink);
     }
     system(command);
 }
@@ -81,7 +84,7 @@ int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "audio share");
-    GdkPixbuf *icon_pixbuf = gdk_pixbuf_new_from_file("./resources/icon.png", NULL);
+    GdkPixbuf *icon_pixbuf = gdk_pixbuf_new_from_file("/etc/audioShare/icon.png", NULL);
     gtk_window_set_icon(GTK_WINDOW(window), icon_pixbuf);
     g_object_unref(icon_pixbuf);
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
