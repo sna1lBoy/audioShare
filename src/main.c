@@ -6,8 +6,27 @@
 
 char* sink;
 
-// prepping pulse audio
-void sinkWizardy() {
+// YEET
+static void on_destroy(GtkWidget *widget, gpointer data) {
+    gtk_main_quit();
+}
+
+// setting sink on check or uncheck based on given index
+static void on_check_button_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
+    const char *index = (const char *)user_data;
+    char command[1024];
+    strcpy(command, "pacmd move-sink-input ");
+    strcat(command, index);
+    if (gtk_toggle_button_get_active(toggle_button)) {
+        strcat(command, " sharedAudio");
+    } else {
+        strcat(command, " ");
+        strcat(command, sink);
+    }
+    system(command);
+}
+
+int main(int argc, char *argv[]) {
 
     // checking to see if the sinks have already been made
     FILE *sinks;
@@ -55,32 +74,8 @@ void sinkWizardy() {
         strcat(command, sink);
         system(command);
     }
-}
 
-// YEET
-static void on_destroy(GtkWidget *widget, gpointer data) {
-    gtk_main_quit();
-}
-
-// setting sink on check or uncheck based on given index
-static void on_check_button_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
-    const char *index = (const char *)user_data;
-    char command[1024];
-    strcpy(command, "pacmd move-sink-input ");
-    strcat(command, index);
-    if (gtk_toggle_button_get_active(toggle_button)) {
-        strcat(command, " sharedAudio");
-    } else {
-        strcat(command, " ");
-        strcat(command, sink);
-    }
-    system(command);
-}
-
-int main(int argc, char *argv[]) {
-
-    // set up sinks and window
-    sinkWizardy();
+    // setting up window
     gtk_init(&argc, &argv);
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "audio share");
