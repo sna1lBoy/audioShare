@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 char* sink;
 
@@ -15,7 +16,7 @@ static void on_destroy(GtkWidget *widget, gpointer data) {
 static void on_check_button_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
     const char *index = (const char *)user_data;
     char command[1024];
-    strcpy(command, "pacmd move-sink-input ");
+    strcpy(command, "pactl move-sink-input ");
     strcat(command, index);
     if (gtk_toggle_button_get_active(toggle_button)) {
         strcat(command, " sharedAudio");
@@ -23,6 +24,7 @@ static void on_check_button_toggled(GtkToggleButton *toggle_button, gpointer use
         strcat(command, " ");
         strcat(command, sink);
     }
+    printf("%s\n", command);
     system(command);
 }
 
@@ -60,18 +62,23 @@ int main(int argc, char *argv[]) {
       sink = strtok(NULL, " ");
     }
     if (sink[strlen(sink)-1] == '\n') { sink[strlen(sink)-1] = '\0'; }
+
+    // getting latency
+    char latencyFull[256];
+    fgets(latencyFull, 256, file);
+    char * latency = strtok(latencyFull, " ");
+    for(int i = 0; i<2; i++) {
+      latency = strtok(NULL, " ");
+    }
+    if (latency[strlen(latency)-1] == '\n') { latency[strlen(latency)-1] = '\0'; }
+
     fclose(file); 
 
     // shamelessly stolen from user.dz (https://askubuntu.com/questions/421014/share-an-audio-playback-stream-through-a-live-audio-video-conversation-like-sk)
     // don't fucking ask me how this even begins to work. i'm not a sound guy, in fact i'm half deaf. boy i really should not be developing audio tools eh
     if (found == 0) {
         char command[1024];
-        strcpy(command, "pactl load-module module-null-sink sink_name=micAndSharedAudio sink_properties=device.description=micAndSharedAudio && pactl load-module module-null-sink sink_name=sharedAudio sink_properties=device.description=sharedAudio && pactl load-module module-loopback latency_msec=1 sink=micAndSharedAudio source=");
-        strcat(command, source);
-        strcat(command, " && pactl load-module module-loopback latency_msec=1 sink=micAndSharedAudio source=sharedAudio.monitor && pactl load-module module-loopback latency_msec=1 sink=");
-        strcat(command, sink);
-        strcat(command, " source=sharedAudio.monitor && pactl set-default-source micAndSharedAudio.monitor && pactl set-default-sink ");
-        strcat(command, sink);
+        snprintf(command, sizeof(command),"pactl load-module module-null-sink sink_name=micAndSharedAudio sink_properties=device.description=micAndSharedAudio && pactl load-module module-null-sink sink_name=sharedAudio sink_properties=device.description=sharedAudio && pactl load-module module-loopback latency_msec=%s sink=micAndSharedAudio source=%s && pactl load-module module-loopback latency_msec=%s sink=micAndSharedAudio source=sharedAudio.monitor && pactl load-module module-loopback latency_msec=%s sink=%s source=sharedAudio.monitor && pactl set-default-source micAndSharedAudio.monitor && pactl set-default-sink %s", latency, source, latency, latency, sink, sink);
         system(command);
     }
 
@@ -85,19 +92,37 @@ int main(int argc, char *argv[]) {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_container_add(GTK_CONTAINER(window), box);
 
+    // get shared audio sink index
+    char line[256];
+    char sinkNumber[5];
+    FILE *sinkList = popen("pactl list sinks short", "r");
+    while (fgets(line, sizeof(line), sinkList) != NULL) {
+            if (strstr(line, "sharedAudio") != NULL) {
+                sscanf(line, "%s", sinkNumber);
+            break;
+        }
+    }
+    for (int i = 0; i < 5; i ++) {
+        if (!isdigit(sinkNumber[i])) {
+                sinkNumber[i] = '\0';
+                break;
+        }
+    }
+    sinkNumber[4] = '\0';
+    pclose(sinkList);
+
     // get all application outputs
     FILE *applications;
     char buffer[1024];
-    applications = popen("pacmd list-sink-inputs", "r");
+    applications = popen("pactl list sink-inputs", "r");
     char appName[1024];
     int nameIndex = 0;
-    char appIndex[2];
+    char appIndex[5];
     char currentSink[256];
-    char dum[256];
     while (fgets(buffer, sizeof(buffer), applications) != NULL) {
         char *ptr = buffer;
-        sscanf(buffer, " index: %s", appIndex);
-        sscanf(buffer, " sink: %s %s",dum, currentSink);
+        sscanf(buffer, " Sink Input #%s", appIndex);
+        sscanf(buffer, " Sink: %s", currentSink);
 
         while ((ptr = strstr(ptr, "application.name = \"")) != NULL) {
             ptr += strlen("application.name = \"");
@@ -109,9 +134,15 @@ int main(int argc, char *argv[]) {
             
             // make check box with application name and pass through index
             GtkWidget *checkBox = gtk_check_button_new_with_label(appName);
-            if (strcmp(currentSink, "<sharedAudio>") == 0) { gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkBox), TRUE); }
+            if (strcmp(currentSink, sinkNumber) == 0) { gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkBox), TRUE); }
             gtk_box_pack_start(GTK_BOX(box), checkBox, FALSE, FALSE, 2);
-            appIndex[2] = '\0';
+            for (int i = 0; i < 5; i ++) {
+                if (!isdigit(appIndex[i])) {
+                    appIndex[i] = '\0';
+                    break;
+                }
+            }
+            appIndex[4] = '\0';
             g_signal_connect(checkBox, "toggled", G_CALLBACK(on_check_button_toggled),  g_strdup(appIndex));
             appName[0] = '\0';
             nameIndex = 0;
