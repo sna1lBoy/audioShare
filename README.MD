@@ -27,6 +27,9 @@ bash <(curl -s https://raw.githubusercontent.com/sna1lBoy/audioShare/main/instal
 ```
 if you want to manually install, download or clone the source code and move the contents of ./bin/ to /bin/ and ./resources/config.ini to /etc/audioShare/config.ini
 
+### in discord (optional)
+for best results, disable noise suppression (aka krisp) and disable "automatically determine input sensitivity" while also moving the slider below all the way to the left
+
 ## configuration
 open /etc/audioShare/config.ini in a text editor of your choice, you should see places to enter a source and a sink. these will be your default input and outputs, respectively, which you can find the name of by using `pactl list short sources` and `pactl list short sinks` and looking for the sink and source you mainly use
 
@@ -35,7 +38,5 @@ for example, the names will probably be in a similar form to
 source = alsa_input.usb-DCMT_Technology_USB_Lavalier_Microphone_214b206000000178-00.mono-fallback
 sink = alsa_output.pci-0000_00_1f.3.analog-stereo
 ```
-## in discord (optional)
-for best results, disable noise suppression (aka krisp) and disable "automatically determine input sensitivity" while also moving the slider below all the way to the left
 ---
 \* gee-you-eye
