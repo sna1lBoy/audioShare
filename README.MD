@@ -35,5 +35,7 @@ for example, the names will probably be in a similar form to
 source = alsa_input.usb-DCMT_Technology_USB_Lavalier_Microphone_214b206000000178-00.mono-fallback
 sink = alsa_output.pci-0000_00_1f.3.analog-stereo
 ```
+## in discord (optional)
+for best results, disable noise suppression (aka krisp) and disable "automatically determine input sensitivity" while also moving the slider below all the way to the left
 ---
 \* gee-you-eye
