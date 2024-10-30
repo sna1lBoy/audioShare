@@ -10,6 +10,7 @@ a GUI* tool to make the process of playing sound along with screen share on disc
 ## installation
 ### a brief warning
 all development and testing was done on an x86-64 machine running arch linux and x11, i cannot guarantee this program will work on other architectures, distros, or display servers. that being said, if audio share breaks for you, please open an issue detailing the problem along with your specs and i may be able to fix it
+
 for example, audio share will break on a default fedora install because it uses pipewire (this has been ~~unintentionally~~ tested)
 
 ### prerequisites 
