@@ -33,7 +33,7 @@ to manually install
 for best results, disable noise suppression (aka krisp) and disable "automatically determine input sensitivity" while also moving the slider below all the way to the left
 
 ## configuration
-open /etc/audioShare/config.ini in a text editor of your choice, you should see places to enter a source and a sink. these will be your default input and outputs, respectively, which you can find the name of by using `pactl list short sources` and `pactl list short sinks` and looking for the sink and source you mainly use
+open `/etc/audioShare/config.ini` in a text editor of your choice, you should see places to enter a source and a sink. these will be your default input and outputs, respectively, which you can find the name of by using `pactl list short sources` and `pactl list short sinks` and looking for the sink and source you mainly use
 
 for example, the names will probably be in a similar form to
 ```
