@@ -1,3 +1,8 @@
+# UPDATE: 11/25
+audio share is no longer needed because, as of linux client v0.0.76, screen sharing has native audio sharing
+
+the code is still left up for if anyone finds it useful
+
 # audio share
 a GUI* tool to make the process of playing sound along with screen share on discord for linux a bit easier
 
